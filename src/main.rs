@@ -30,7 +30,7 @@ fn main() {
     }
     for i in 0..width {
         kotae = &onejigen[width*i..width*i+width];
-        println!("{:?}",kotae)
+        println!("{:?}",kotae);
     }
     
 }
