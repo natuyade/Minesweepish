@@ -11,7 +11,7 @@ fn main() {
 
     for _ in 0..onejigen.len() {
         //onejigen[zahyou] += 1;
-        if row!=0&&row!=onejigen.len()/5-1&&column!=0&&column!=width-1{
+        if row!=0&&row!=onejigen.len()/width-1&&column!=0&&column!=width-1{
             if fastrand::i32(0..100) <= 80{
                 onejigen[zahyou] += 1;
             } else {
