@@ -28,9 +28,7 @@ impl MapInfo {
             for i in 0..offset.len() {
                 let x = offset[i][1] + 1;
                 let y = offset[i][0] + 1;
-                if map[y][x] != 9 {
                     map[y][x] = 9;
-                }
             }
             for y in 0..size[0] + 2 {
                 for x in 0..size[1] + 2 {
