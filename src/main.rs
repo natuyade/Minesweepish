@@ -1,59 +1,121 @@
 struct MapInfo {
+    map_size: Vec<usize>,
     bomb_offset: Vec<Vec<usize>>,
-    hint_num: Vec<Vec<usize>>
-}   
+    hint_num: Vec<Vec<usize>>,
+}
 
 impl MapInfo {
-    fn new( base_size: Vec<usize> , base_percent:usize ) -> Self {
-        fn map_builder( size: &[usize], offset: &[Vec<usize>]) -> Vec<Vec<usize>> {
-            let mut map: Vec<Vec<usize>> = vec![vec![0;size[0]];size[1]];
-            for i in offset.iter(){
-                let x = i[0];
-                let y = i[1];
-                
-                map[x+1][y] +=1;
-                map[x+1][y+1] +=1;
-                map[x][y+1] +=1;
-                map[x-1][y+1] +=1;
-                map[x-1][y] +=1;
-                map[x-1][y-1] +=1;
-                map[x][y-1] +=1;
-                map[x+1][y-1] +=1;
+    fn new(base_size: Vec<usize>, base_percent: usize) -> Self {
+        fn map_builder(size: &[usize], offset: &[Vec<usize>]) -> Vec<Vec<usize>> {
+            let mut map: Vec<Vec<usize>> = vec![vec![0; size[0] + 2]; size[1] + 2];
+            
+            for i in 0..offset.len() {
+                let x = offset[i][1] + 1;
+                let y = offset[i][0] + 1;
+
+                if map[y][x] != 9 {
+                map[y + 1][x] += 1;
+                map[y + 1][x + 1] += 1;
+                map[y][x + 1] += 1;
+                map[y - 1][x + 1] += 1;
+                map[y - 1][x] += 1;
+                map[y - 1][x - 1] += 1;
+                map[y][x - 1] += 1;
+                map[y + 1][x - 1] += 1;
+                map[y][x] = 9;
+                }
             }
-            for i in offset.iter(){
-                let x = i[0];
-                let y = i[1];
-                map[x][y] =9;
+            for i in 0..offset.len() {
+                let x = offset[i][1] + 1;
+                let y = offset[i][0] + 1;
+                if map[y][x] != 9 {
+                    map[y][x] = 9;
+                }
             }
+            for y in 0..size[0] + 2 {
+                for x in 0..size[1] + 2 {
+                    if y == 0 || y == size[0] + 1 || x == 0 || x == size[1] + 1 {
+                        map[x].pop();
+                    }
+                }
+            }
+
+            println!("// bomb and bomb offset");
+            println!("------------");
+            for y in map.iter() {
+                for x in y.iter() {
+                    print!("{}", x)
+                }
+                println!()
+            }
+            println!("------------");
             map
         }
-        fn set_offset_random( size: &[usize], percent: usize ) -> Vec<Vec<usize>> {
+        fn set_offset_random(size: &[usize], percent: usize) -> Vec<Vec<usize>> {
             let mut offset: Vec<Vec<usize>> = vec![];
-            for _ in 0..(size[0]*size[1])*percent/100 {
-                offset.push(vec![fastrand::usize(0..size[0]),fastrand::usize(0..size[1])]);
+            for _ in 0..(size[0] * size[1]) * percent / 100 {
+                let x = fastrand::usize(0..size[1]);
+                let y = fastrand::usize(0..size[0]);
+                offset.push(vec![x, y]);
             }
             offset
         }
-        
+
         let set_bomb_offset = set_offset_random(&base_size, base_percent);
         let set_hint_num = map_builder(&base_size, &set_bomb_offset);
         Self {
+            map_size: base_size,
             bomb_offset: set_bomb_offset,
-            hint_num: set_hint_num
+            hint_num: set_hint_num,
         }
     }
 }
 
 fn main() {
-    let map_size: Vec<usize> = vec![10,10];
+    let map_size: Vec<usize> = vec![10, 10];
     let bomb_per: usize = 20;
     let map_info = MapInfo::new(map_size, bomb_per);
-    
+    let rendered_map = render_map(&map_info);
+    check_answer(rendered_map);
 }
 
+fn render_map(map_info: &MapInfo) -> Vec<Vec<String>> {
+    let map_size = &map_info.map_size;
+    let render_size_x = map_size[1] + 2;
+    let render_size_y = map_size[0] + 2;
 
+    let mut play_map = vec![vec!["🟦".to_string(); render_size_x]; render_size_y];
 
+    for y in 0..render_size_y {
+        for x in 0..render_size_x {
+            if y == 0 || y == render_size_y - 1 || x == 0 || x == render_size_x - 1 {
+                play_map[y][x] = "🧱".to_string()
+            }
+        }
+    }
+    //render
+    for y in play_map.iter() {
+        for x in y.iter() {
+            print!("{}", x)
+        }
+        println!()
+    }
+    //周り削除
+    for y in 0..render_size_y {
+        for x in 0..render_size_x {
+            if y == 0 || y == render_size_y - 1 || x == 0 || x == render_size_x - 1 {
+                play_map[y][x].pop();
+            }
+        }
+    }
+    play_map
+}
 
+fn check_answer(rendered_map: Vec<Vec<String>>) {
+    let map = rendered_map;
+    let input_x = 1;
+    let input_y = 5;
+}
 
 /*
 fn old_bomb_set(map: &mut MapInfo) {
