@@ -13,7 +13,7 @@ impl MapInfo {
                 let x = offset[i][1] + 1;
                 let y = offset[i][0] + 1;
 
-                if map[y][x] != 9 {
+                if map[y][x] <= 8 {
                 map[y + 1][x] += 1;
                 map[y + 1][x + 1] += 1;
                 map[y][x + 1] += 1;
@@ -47,6 +47,7 @@ impl MapInfo {
                 println!()
             }
             println!("------------");
+            println!("{:?}",map[1]);
             map
         }
         fn set_offset_random(size: &[usize], percent: usize) -> Vec<Vec<usize>> {
@@ -74,7 +75,7 @@ fn main() {
     let bomb_per: usize = 20;
     let map_info = MapInfo::new(map_size, bomb_per);
     let rendered_map = render_map(&map_info);
-    check_answer(rendered_map);
+    check_answer(&map_info, rendered_map);
 }
 
 fn render_map(map_info: &MapInfo) -> Vec<Vec<String>> {
@@ -106,10 +107,12 @@ fn render_map(map_info: &MapInfo) -> Vec<Vec<String>> {
             }
         }
     }
+    print!("{:?}",play_map[0]);
     play_map
 }
 
-fn check_answer(rendered_map: Vec<Vec<String>>) {
+fn check_answer( map_info: &MapInfo, rendered_map: Vec<Vec<String>>) {
+    let mapinfo = &map_info.hint_num;
     let map = rendered_map;
     let input_x = 1;
     let input_y = 5;
