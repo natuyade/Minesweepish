@@ -33,12 +33,12 @@ impl MapInfo {
             for y in 0..size[0] + 2 {
                 for x in 0..size[1] + 2 {
                     if y == 0 || y == size[0] + 1 || x == 0 || x == size[1] + 1 {
-                        map[x].pop();
+                        map[x].remove(0);
                     }
                 }
             }
 
-            println!("// bomb and bomb offset");
+            /*println!("// bomb and bomb offset");
             println!("------------");
             for y in map.iter() {
                 for x in y.iter() {
@@ -46,8 +46,7 @@ impl MapInfo {
                 }
                 println!()
             }
-            println!("------------");
-            println!("{:?}",map[1]);
+            println!("------------");*/
             map
         }
         fn set_offset_random(size: &[usize], percent: usize) -> Vec<Vec<usize>> {
@@ -89,33 +88,70 @@ fn render_map(map_info: &MapInfo) -> Vec<Vec<String>> {
         for x in 0..render_size_x {
             if y == 0 || y == render_size_y - 1 || x == 0 || x == render_size_x - 1 {
                 play_map[y][x] = "🧱".to_string()
-            }
-        }
+            }// Vec<Vec<String>>とVec<Vec<usize>>でpopの後の処理が変わる
+        }// String -pop> '""' usize -pop> ''
     }
-    //render
+    /* //render
     for y in play_map.iter() {
         for x in y.iter() {
             print!("{}", x)
         }
         println!()
-    }
+    } */
     //周り削除
     for y in 0..render_size_y {
         for x in 0..render_size_x {
             if y == 0 || y == render_size_y - 1 || x == 0 || x == render_size_x - 1 {
-                play_map[y][x].pop();
+                play_map[y][x].remove(0);
             }
         }
     }
-    print!("{:?}",play_map[0]);
     play_map
 }
 
 fn check_answer( map_info: &MapInfo, rendered_map: Vec<Vec<String>>) {
     let mapinfo = &map_info.hint_num;
-    let map = rendered_map;
-    let input_x = 1;
-    let input_y = 5;
+    let mut map = rendered_map;
+    let input_x = 0;//test
+    let input_y = 4;//test
+    
+    if mapinfo[input_y][input_x] == 0 {
+        map[input_y+1][input_x+1] = "０".to_string();
+        
+    }
+    if mapinfo[input_y][input_x] == 1 {
+        map[input_y+1][input_x+1] = "１".to_string();
+        
+    }
+    if mapinfo[input_y][input_x] == 2 {
+        map[input_y+1][input_x+1] = "２".to_string();
+        
+    }
+    if mapinfo[input_y][input_x] == 3 {
+        map[input_y+1][input_x+1] = "３".to_string();
+        
+    }
+    if mapinfo[input_y][input_x] == 4 {
+        map[input_y+1][input_x+1] = "４".to_string();
+        
+    }
+    if mapinfo[input_y][input_x] == 5 {
+        map[input_y+1][input_x+1] = "５".to_string();
+        
+    }
+
+    for y in mapinfo.iter() {
+        for x in y.iter() {
+            print!("{:?}", x)
+        }
+        println!()
+    }
+    for y in map.iter() {
+        for x in y.iter() {
+            print!("{:?}", x)
+        }
+        println!()
+    }
 }
 
 /*
