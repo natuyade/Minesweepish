@@ -9,63 +9,73 @@ impl MapInfo {
         fn map_builder(size: &[usize], offset: &[Vec<usize>]) -> Vec<Vec<usize>> {
             let mut map: Vec<Vec<usize>> = vec![vec![0; size[0]]; size[1]]; //map=vec![vec![0; x10]; y12]
 
-            for offset_yx in offset.iter() {
-                map[offset_yx[1]][offset_yx[0]] += 9;
-            }
-            /*
             for i in 0..offset.len() {
                 let offset_y = offset[i][1];
                 let offset_x = offset[i][0];
 
-                    if map[offset_y][offset_x] <= 8 && offset_y == 0&&offset_x == 0 {
+                if size[0] <= 2 && size[1] <= 2{
+                    if offset_y == 0&&offset_x == 0 && size[0] == 1 && size[1] == 2 {
+                        map[offset_y+1][offset_x] += 1;
+                    }
+                    if offset_y == 1&&offset_x == 0 && size[0] == 1 && size[1] == 2 {
+                        map[offset_y-1][offset_x] += 1;
+                    }
+                    if offset_y == 0&&offset_x == 0 && size[0] == 2 && size[1] == 1 {
                         map[offset_y][offset_x+1] += 1;
+                    }
+                    if offset_y == 0&&offset_x == 1 && size[0] == 2 && size[1] == 1 {
+                        map[offset_y][offset_x-1] += 1;
+                    }
+                } else {
+                    if offset_y == 0&&offset_x == 0 && size[0] >= 2 && size[1] >= 2{
+                        map[offset_y][offset_x+1] += 1;/////migi
                         map[offset_y+1][offset_x] += 1;
                         map[offset_y+1][offset_x+1] += 1;
                     }
-                    if map[offset_y][offset_x] <= 8 && offset_y == 0 {
+                    if offset_y == 0 && offset_x != 0 && offset_x != size[0]-1 {
                         map[offset_y][offset_x-1] += 1;
                         map[offset_y][offset_x+1] += 1;
                         map[offset_y+1][offset_x-1] += 1;
                         map[offset_y+1][offset_x] += 1;
                         map[offset_y+1][offset_x+1] += 1;
                     }
-                    if offset_y == 0 && offset_x == size[0]-1 {
-                        map[offset_y][offset_x-1] += 1;
-                        map[offset_y-1][offset_x-1] += 1;
-                        map[offset_y-1][offset_x] += 1;
-                    }
-                    if map[offset_y][offset_x] <= 8 && offset_x == 0 {
-                        map[offset_y-1][offset_x] += 1;
-                        map[offset_y-1][offset_x+1] += 1;
-                        map[offset_y][offset_x+1] += 1;
-                        map[offset_y+1][offset_x] += 1;
-                        map[offset_y+1][offset_x+1] += 1;
-                    }
-                    if map[offset_y][offset_x] <= 8 && offset_x == size[0]-1 {
-                        map[offset_y-1][offset_x-1] += 1;
-                        map[offset_y-1][offset_x] += 1;
+                    if offset_y == 0 && offset_x == size[0]-1 && size[0] >= 2 && size[1] >= 2{
                         map[offset_y][offset_x-1] += 1;
                         map[offset_y+1][offset_x-1] += 1;
                         map[offset_y+1][offset_x] += 1;
                     }
-                    if map[offset_y][offset_x] <= 8 && offset_y == size[1]-1 && offset_x == 0 {
-                        map[offset_y+1][offset_x]+=1;
-                        map[offset_y+1][offset_x+1]+=1;
+                    if offset_x == 0 && offset_y != 0 && offset_y != size[1]-1{
+                        map[offset_y-1][offset_x] += 1;
+                        map[offset_y-1][offset_x+1] += 1;/////migi
+                        map[offset_y][offset_x+1] += 1;
+                        map[offset_y+1][offset_x] += 1;///////hidari
+                        map[offset_y+1][offset_x+1] += 1;
+                    }
+                    if offset_x == size[0]-1 && offset_y != 0 && offset_y != size[1]-1{
+                        map[offset_y-1][offset_x-1] += 1;
+                        map[offset_y-1][offset_x] += 1;
+                        map[offset_y][offset_x-1] += 1;
+                        map[offset_y+1][offset_x-1] += 1;///////hidari
+                        map[offset_y+1][offset_x] += 1;
+                    }
+                    if offset_y == size[1]-1 && offset_x == 0 && size[0] >= 2 && size[1] >= 2{
+                        map[offset_y-1][offset_x]+=1;
+                        map[offset_y-1][offset_x+1]+=1;
                         map[offset_y][offset_x+1]+=1;
                     }
-                    if map[offset_y][offset_x] <= 8 && offset_y == size[1]-1 {
+                    if offset_y == size[1]-1 && offset_x != 0 && offset_x != size[0]-1{
                         map[offset_y-1][offset_x-1] +=1;
                         map[offset_y-1][offset_x] +=1;
                         map[offset_y-1][offset_x+1] +=1;
                         map[offset_y][offset_x-1] +=1;
                         map[offset_y][offset_x+1] +=1;
                     }
-                    if map[offset_y][offset_x] <= 8 && offset_y == size[1]-1 && offset_x == size[0]-1{
+                    if offset_y == size[1]-1 && offset_x == size[0]-1&& size[0] >= 2 && size[1] >= 2{
                         map[offset_y-1][offset_x-1] +=1;
                         map[offset_y-1][offset_x] +=1;
                         map[offset_y][offset_x-1] +=1;
                     }
-                    if map[offset_y][offset_x] <= 8 && offset_x != 0&& offset_y != 0 && offset_x != size[0]-1 && offset_y != size[1] -1 {
+                    if offset_x != 0&& offset_y != 0 && offset_x != size[0]-1 && offset_y != size[1] -1 {
                         map[offset_y-1][offset_x-1] +=1;
                         map[offset_y-1][offset_x] +=1;
                         map[offset_y-1][offset_x+1] +=1;
@@ -75,50 +85,16 @@ impl MapInfo {
                         map[offset_y+1][offset_x] +=1;
                         map[offset_y+1][offset_x+1] +=1;
                     }
-            } */
 
-            /*
-            for i in 0..offset.len() {
-                let y = offset[i][1] + 1;
-                let x = offset[i][0] + 1;
-
-                if map[y][x] <= 8 {
-                map[y + 1][x] += 1;
-                map[y + 1][x + 1] += 1;
-                map[y][x + 1] += 1;
-                map[y - 1][x + 1] += 1;
-                map[y - 1][x] += 1;
-                map[y - 1][x - 1] += 1;
-                map[y][x - 1] += 1;
-                map[y + 1][x - 1] += 1;
-                map[y][x] = 9;
                 }
-            } */
+
+            }
+
             for i in 0..offset.len() {
                 let offset_x = offset[i][0];
                 let offset_y = offset[i][1];
-                if map[offset_y][offset_x] >= 9 {
                     map[offset_y][offset_x] = 9;
-                }
             }
-            /*
-            for y in 0..size[0] + 2 {
-            for x in 0..size[1] + 2 {
-            if y == 0 || y == size[0] + 1 || x == 0 || x == size[1] + 1 {
-            map[x].remove(0);
-            }
-            }
-            }*/
-
-            /*println!("// bomb and bomb offset");
-            println!("------------");
-            for y in map.iter() {
-                for x in y.iter() {
-                    print!("{}", x)
-                }
-                println!()
-            }
-            println!("------------");*/
             map
         }
         fn set_offset_random(size: &[usize], percent: usize) -> Vec<Vec<usize>> {
@@ -134,17 +110,14 @@ impl MapInfo {
                 let gate_y = fastrand::usize(0..size[1]);
                 for i in 0..offset.len() {
                         if offset[i][0] != gate_x && offset[i][1] != gate_y&&offset.len() != num_of_bomb {
-                            print!("[true!{}/{}]",offset.len(),num_of_bomb);
                             offset_bool.push(true);
                         }
                         if offset[i][0] == gate_x && offset[i][1] == gate_y&&offset.len() != num_of_bomb {
-                            print!("[false!{}/{}]",offset.len(),num_of_bomb);
                             offset_bool.push(false);
                         }
 
                 }
                 if offset_bool.iter().all(|&bool|bool) == true {
-                    println!("[push!{}/{}]",offset.len(),num_of_bomb);
                     offset.push(vec![gate_x, gate_y])
                 }
             }
@@ -163,7 +136,7 @@ impl MapInfo {
 }
 
 fn main() {
-    let map_size: Vec<usize> = vec![4, 4];
+    let map_size: Vec<usize> = vec![10, 12];
     let bomb_per: usize = 50;
     let map_info = MapInfo::new(map_size, bomb_per);
     let rendered_map = render_map(&map_info);
@@ -198,8 +171,8 @@ fn render_map(map_info: &MapInfo) -> Vec<Vec<String>> {
 fn check_answer(map_info: &MapInfo, rendered_map: Vec<Vec<String>>) {
     let mapinfo = &map_info.hint_num;
     let mut map = rendered_map;
-    //let input_x = 0; //test
-    //let input_y = 4; //test
+    let input_x = 0; //test
+    let input_y = 0; //test
     // render test
     for y in mapinfo.iter() {
         for x in y.iter() {
@@ -207,6 +180,11 @@ fn check_answer(map_info: &MapInfo, rendered_map: Vec<Vec<String>>) {
         }
         println!()
     }
+
+    println!("{},{}は{}でした！",input_x,input_y,mapinfo[input_y][input_x]);
+
+        map[input_y+1][input_x+1] = num_convert(mapinfo[input_y][input_x]);
+
     for y in map.iter() {
         for x in y.iter() {
             print!("{}", x)
@@ -215,56 +193,17 @@ fn check_answer(map_info: &MapInfo, rendered_map: Vec<Vec<String>>) {
     }
 }
 
-/*
-fn old_bomb_set(map: &mut MapInfo) {
-    for y in 0..map.ms_map.len(){
-        for x in 0..map.ms_map[0].len(){
-            if fastrand::i32(0..100) <= 20 {
-                map.bomb_map[y][x] =1;
-            }
-        }
+fn num_convert(number: usize) -> String {
+    match number {
+        1 => "１".to_string(),
+        2 => "２".to_string(),
+        3 => "３".to_string(),
+        4 => "４".to_string(),
+        5 => "５".to_string(),
+        6 => "６".to_string(),
+        7 => "７".to_string(),
+        8 => "８".to_string(),
+        9 => "💣".to_string(),
+        _ => "".to_string()
     }
-
-    //for row in stage.iter() {
-    //    println!("{:?}",row)
-    //}
-    //stage
 }
-fn old_render(map: &MapInfo) -> Vec<Vec<String>> {
-    let mut x_size = map.ms_map.len();
-    let mut y_size = map.ms_map[0].len();
-    //print!("{:?}{:?}",x,y);
-    x_size += 2;
-    y_size += 2;
-    let mut render_map: Vec<Vec<String>> = vec![vec!["🟦".to_string(); x_size]; y_size];
-
-    for y in 0..y_size {
-        for x in 0..x_size {
-            if x == 0 || x == x_size - 1 || y == 0 || y == y_size - 1 {
-                render_map[x][y] = "🧱".to_string();
-            }
-        }
-    }
-
-    let ms_x_size = map.ms_map.len();
-    let ms_y_size = map.ms_map[0].len();
-
-    let bomb = &map.bomb_map;
-
-    for y in 0..ms_y_size {
-        for x in 0..ms_x_size {
-            if bomb[y][x] == 1 {
-                render_map[y + 1][x + 1] = "💣".to_string()
-            }
-        }
-    }
-
-    for y in render_map.iter() {
-        for x in y.iter() {
-            print!("{}", x);
-        }
-        println!()
-    }
-    render_map
-}
-*/
