@@ -28,7 +28,7 @@ impl MapInfo {
                     }
                 } else {
                     if offset_y == 0&&offset_x == 0 && size[0] >= 2 && size[1] >= 2{
-                        map[offset_y][offset_x+1] += 1;/////migi
+                        map[offset_y][offset_x+1] += 1;
                         map[offset_y+1][offset_x] += 1;
                         map[offset_y+1][offset_x+1] += 1;
                     }
@@ -46,16 +46,16 @@ impl MapInfo {
                     }
                     if offset_x == 0 && offset_y != 0 && offset_y != size[1]-1{
                         map[offset_y-1][offset_x] += 1;
-                        map[offset_y-1][offset_x+1] += 1;/////migi
+                        map[offset_y-1][offset_x+1] += 1;
                         map[offset_y][offset_x+1] += 1;
-                        map[offset_y+1][offset_x] += 1;///////hidari
+                        map[offset_y+1][offset_x] += 1;
                         map[offset_y+1][offset_x+1] += 1;
                     }
                     if offset_x == size[0]-1 && offset_y != 0 && offset_y != size[1]-1{
                         map[offset_y-1][offset_x-1] += 1;
                         map[offset_y-1][offset_x] += 1;
                         map[offset_y][offset_x-1] += 1;
-                        map[offset_y+1][offset_x-1] += 1;///////hidari
+                        map[offset_y+1][offset_x-1] += 1;
                         map[offset_y+1][offset_x] += 1;
                     }
                     if offset_y == size[1]-1 && offset_x == 0 && size[0] >= 2 && size[1] >= 2{
@@ -137,7 +137,7 @@ impl MapInfo {
 
 fn main() {
     let map_size: Vec<usize> = vec![10, 12];
-    let bomb_per: usize = 50;
+    let bomb_per: usize = 5;
     let map_info = MapInfo::new(map_size, bomb_per);
     let rendered_map = render_map(&map_info);
     check_answer(&map_info, rendered_map);
@@ -171,8 +171,10 @@ fn render_map(map_info: &MapInfo) -> Vec<Vec<String>> {
 fn check_answer(map_info: &MapInfo, rendered_map: Vec<Vec<String>>) {
     let mapinfo = &map_info.hint_num;
     let mut map = rendered_map;
-    let input_x = 0; //test
-    let input_y = 0; //test
+    let mut input_x = 0; //test
+    let mut input_y = 0; //test
+    let map_x = input_x + 1; //test
+    let map_y = input_y + 1; //test
     // render test
     for y in mapinfo.iter() {
         for x in y.iter() {
@@ -183,7 +185,10 @@ fn check_answer(map_info: &MapInfo, rendered_map: Vec<Vec<String>>) {
 
     println!("{},{}は{}でした！",input_x,input_y,mapinfo[input_y][input_x]);
 
-        map[input_y+1][input_x+1] = num_convert(mapinfo[input_y][input_x]);
+        map[map_y][map_x] = num_convert(mapinfo[input_y][input_x]);
+    if mapinfo[input_y][input_x+1] == 0 {
+        map[map_y+1][map_x] = " ０".to_string();
+    }
 
     for y in map.iter() {
         for x in y.iter() {
@@ -195,15 +200,65 @@ fn check_answer(map_info: &MapInfo, rendered_map: Vec<Vec<String>>) {
 
 fn num_convert(number: usize) -> String {
     match number {
-        1 => "１".to_string(),
-        2 => "２".to_string(),
-        3 => "３".to_string(),
-        4 => "４".to_string(),
-        5 => "５".to_string(),
-        6 => "６".to_string(),
-        7 => "７".to_string(),
-        8 => "８".to_string(),
-        9 => "💣".to_string(),
+        0 => " ０".to_string(),
+        1 => " １".to_string(),
+        2 => " ２".to_string(),
+        3 => " ３".to_string(),
+        4 => " ４".to_string(),
+        5 => " ５".to_string(),
+        6 => " ６".to_string(),
+        7 => " ７".to_string(),
+        8 => " ８".to_string(),
+        9 => " 💣 ".to_string(),
         _ => "".to_string()
     }
+}
+
+fn open_cell(bomb:&Vec<Vec<usize>>,map:&mut Vec<Vec<String>>, input_x: usize , input_y: usize) {
+    let hint_num = bomb.clone();
+
+    for y in 0..hint_num[1].len() {
+        for x in 0..hint_num[0].len() {
+            if hint_num[1].len()-1 == 0 || hint_num[0].len()-1 == 0 {
+                if hint_num[0].len() -1 == 0 && y == 0 {
+                    map[input_y+1][input_x] = num_convert(hint_num[input_y+1][input_x]);
+                    open_cell(&hint_num,map,input_x,input_y)
+                }
+                if hint_num[0].len() -1 == 0 && y == hint_num[1].len() -1 {
+                    map[input_y][input_x] = num_convert(hint_num[input_y-1][input_x]);
+                    open_cell(&hint_num,map,input_x,input_y)
+                }
+                if hint_num[1].len() -1 == 0 && x == 0 {
+                    map[input_y][input_x] = num_convert(hint_num[input_y][input_x+1]);
+                    open_cell(&hint_num,map,input_x,input_y)
+                }
+                if hint_num[1].len() -1 == 0 && x == hint_num[0].len() -1 {
+                    map[input_y][input_x] = num_convert(hint_num[input_y][input_x-1]);
+                    open_cell(&hint_num,map,input_x,input_y)
+                }
+
+            }
+            if hint_num[1].len()-1 == 0 || hint_num[0].len()-1 == 0 {
+                open_cell(&hint_num,map,input_x,input_y)
+            }
+        }
+    }
+
+
+
+
+
+
+    if hint_num[input_y][input_x+1] == 0 {
+        num_convert(hint_num[input_y][input_x+1]);
+        open_cell(&hint_num,map,input_x+1,input_y);
+    };
+    if hint_num[input_y][input_x+1] == 0 {
+        num_convert(hint_num[input_y][input_x+1]);
+        open_cell(&hint_num,map,input_x+1,input_y);
+    };
+    if hint_num[input_y][input_x+1] != 0 && hint_num[input_y][input_x+1] <= 8 {
+
+    };
+
 }
