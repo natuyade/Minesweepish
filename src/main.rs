@@ -99,12 +99,16 @@ impl MapInfo {
         }
         fn set_offset_random(size: &[usize], percent: usize) -> Vec<Vec<usize>> {
             let mut offset: Vec<Vec<usize>> = vec![];
-            let num_of_bomb = (size[0] * size[1]) * percent / 100;
+            let mut num_of_bomb = (size[0] * size[1]) * percent / 100;
             let rand_x = fastrand::usize(0..size[0]);
             let rand_y = fastrand::usize(0..size[1]);
             offset.push(vec![rand_x, rand_y]);
 
+            if num_of_bomb == 0 {
+                num_of_bomb = 1;
+            }
             while offset.len() != num_of_bomb {
+                println!("{}:{}",offset.len(),num_of_bomb);
                 let mut offset_bool:Vec<bool> = vec![];
                 let gate_x = fastrand::usize(0..size[0]);
                 let gate_y = fastrand::usize(0..size[1]);
@@ -136,8 +140,8 @@ impl MapInfo {
 }
 
 fn main() {
-    let map_size: Vec<usize> = vec![9, 9];
-    let bomb_per: usize = 1;
+    let map_size: Vec<usize> = vec![10, 10];
+    let bomb_per: usize = 6;
     let map_info = MapInfo::new(map_size, bomb_per);
     let rendered_map = render_map(&map_info);
     check_answer(&map_info, rendered_map);
@@ -171,10 +175,10 @@ fn render_map(map_info: &MapInfo) -> Vec<Vec<String>> {
 fn check_answer(map_info: &MapInfo, rendered_map: Vec<Vec<String>>) {
     let mapinfo = &map_info.hint_num;
     let mut map = rendered_map;
-    let mut input_x = 3; //test
-    let mut input_y = 3; //test
-    let map_x = input_x + 1; //test
-    let map_y = input_y + 1; //test
+    let mut input_x = 0; //test
+    let mut input_y = 0; //test
+    let map_x = input_x + 1;
+    let map_y = input_y + 1;
     // render test
     for y in mapinfo.iter() {
         for x in y.iter() {
@@ -228,6 +232,7 @@ fn open_cell(bomb:&Vec<Vec<usize>>,map:&mut Vec<Vec<String>>, input_x: usize , i
     map[input_y+1][input_x+1] = num_convert(hint_num[input_y][input_x]);
     queue.push(vec![input_x, input_y]);
     while !queue.is_empty() {
+        println!("queue: {:?}", queue);
         let queue_pop = queue.pop().unwrap();
         let pop_x = queue_pop[0];
         let pop_y = queue_pop[1];
@@ -263,7 +268,7 @@ fn open_cell(bomb:&Vec<Vec<usize>>,map:&mut Vec<Vec<String>>, input_x: usize , i
                         queue.push(vec![pop_x+1, pop_y])
                     }
                 }
-                if pop_x+1 <= 8 && pop_x+1 != 0 {
+                if hint_num[pop_y][pop_x + 1] <= 8 && hint_num[pop_y][pop_x + 1] != 0 {
                     if map[map_y][map_x + 1] == " 🟦 ".to_string() {
                         map[map_y][map_x + 1] = num_convert(hint_num[pop_y][pop_x + 1]);
                     }
@@ -275,7 +280,7 @@ fn open_cell(bomb:&Vec<Vec<usize>>,map:&mut Vec<Vec<String>>, input_x: usize , i
                         queue.push(vec![pop_x, pop_y+1])
                     }
                 }
-                if pop_y+1 <= 8 && pop_y+1 != 0 {
+                if hint_num[pop_y + 1][pop_x] <= 8 && hint_num[pop_y + 1][pop_x] != 0 {
                     if map[map_y + 1][map_x] == " 🟦 ".to_string() {
                         map[map_y + 1][map_x] = num_convert(hint_num[pop_y + 1][pop_x]);
                     }
@@ -292,7 +297,7 @@ fn open_cell(bomb:&Vec<Vec<usize>>,map:&mut Vec<Vec<String>>, input_x: usize , i
                         queue.push(vec![pop_x-1, pop_y])
                     }
                 }
-                if pop_x-1 <= 8 && pop_x-1 != 0 {
+                if hint_num[pop_y][pop_x-1] <= 8 && hint_num[pop_y][pop_x-1] != 0 {
                     if map[map_y][map_x - 1] == " 🟦 ".to_string() {
                         map[map_y][map_x - 1] = num_convert(hint_num[pop_y][pop_x - 1]);
                     }
@@ -304,7 +309,7 @@ fn open_cell(bomb:&Vec<Vec<usize>>,map:&mut Vec<Vec<String>>, input_x: usize , i
                         queue.push(vec![pop_x+1, pop_y])
                     }
                 }
-                if pop_x+1 <= 8 && pop_x+1 != 0 {
+                if hint_num[pop_y][pop_x + 1] <= 8 && hint_num[pop_y][pop_x + 1] != 0 {
                     if map[map_y][map_x + 1] == " 🟦 ".to_string() {
                         map[map_y][map_x + 1] = num_convert(hint_num[pop_y][pop_x + 1]);
                     }
