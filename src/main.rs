@@ -136,7 +136,7 @@ impl MapInfo {
 }
 
 fn main() {
-    let map_size: Vec<usize> = vec![12, 12];
+    let map_size: Vec<usize> = vec![9, 9];
     let bomb_per: usize = 1;
     let map_info = MapInfo::new(map_size, bomb_per);
     let rendered_map = render_map(&map_info);
@@ -217,364 +217,373 @@ fn num_convert(number: usize) -> String {
 fn open_cell(bomb:&Vec<Vec<usize>>,map:&mut Vec<Vec<String>>, input_x: usize , input_y: usize) {
     println!("open_cell呼ばれた: x={}, y={}", input_x, input_y);
     let hint_num = bomb.clone();
+    let mut queue: Vec<Vec<usize>> = vec![];
     let hint_x = &hint_num[0];
-    let hint_y = &hint_num[1];
-    let map_x = input_x + 1;
-    let map_y = input_y + 1;
+    let hint_y = &hint_num;
     /*
     if map[input_y+1][input_x] == " 🟦 ".to_string(){
         open_cell(&hint_num,map,input_x,input_y+1)
     }
     */
-        map[map_y][map_x] = num_convert(hint_num[input_y][input_x]);
-            if hint_y.len()-1 == 0 || hint_x.len()-1 == 0 {
-                if hint_x.len() -1 == 0 && input_y == 0 {
-                    map[map_y+1][map_x] = num_convert(hint_num[input_y+1][input_x]);
+    map[input_y+1][input_x+1] = num_convert(hint_num[input_y][input_x]);
+    queue.push(vec![input_x, input_y]);
+    while !queue.is_empty() {
+        let queue_pop = queue.pop().unwrap();
+        let pop_x = queue_pop[0];
+        let pop_y = queue_pop[1];
+        let map_x = pop_x + 1;
+        let map_y = pop_y + 1;
+
+        if hint_y.len()-1 == 0 || hint_x.len()-1 == 0 {
+            if hint_x.len() -1 == 0 && pop_y == 0 {
+                map[map_y+1][map_x] = num_convert(hint_num[pop_y+1][pop_x]);
+            }
+
+            if hint_x.len() -1 == 0 && pop_y == hint_y.len() -1 {
+                map[map_y-1][map_x] = num_convert(hint_num[pop_y-1][pop_x]);
+            }
+
+            if hint_y.len() -1 == 0 && pop_x == 0 {
+                map[map_y][map_x+1] = num_convert(hint_num[pop_y][pop_x+1]);
+            }
+
+            if hint_y.len() -1 == 0 && pop_x == hint_x.len() -1 {
+                map[map_y][map_x-1] = num_convert(hint_num[pop_y][pop_x-1]);
+            }
+
+        }
+
+        if hint_y.len()-1 >= 1 || hint_x.len()-1 >= 1 {
+
+            if pop_y == 0 && pop_x == 0 {
+                //左上
+                if hint_num[pop_y][pop_x + 1] == 0 {
+                    if map[map_y][map_x + 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x + 1] = num_convert(hint_num[pop_y][pop_x + 1]);
+                        queue.push(vec![pop_x+1, pop_y])
+                    }
+                }
+                if pop_x+1 <= 8 && pop_x+1 != 0 {
+                    if map[map_y][map_x + 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x + 1] = num_convert(hint_num[pop_y][pop_x + 1]);
+                    }
                 }
 
-                if hint_x.len() -1 == 0 && input_y == hint_y.len() -1 {
-                    map[map_y-1][map_x] = num_convert(hint_num[input_y-1][input_x]);
+                if hint_num[pop_y + 1][pop_x] == 0 {
+                    if map[map_y + 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y + 1][map_x] = num_convert(hint_num[pop_y + 1][pop_x]);
+                        queue.push(vec![pop_x, pop_y+1])
+                    }
                 }
-
-                if hint_y.len() -1 == 0 && input_x == 0 {
-                    map[map_y][map_x+1] = num_convert(hint_num[input_y][input_x+1]);
-                }
-
-                if hint_y.len() -1 == 0 && input_x == hint_x.len() -1 {
-                    map[map_y][map_x-1] = num_convert(hint_num[input_y][input_x-1]);
+                if pop_y+1 <= 8 && pop_y+1 != 0 {
+                    if map[map_y + 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y + 1][map_x] = num_convert(hint_num[pop_y + 1][pop_x]);
+                    }
                 }
 
             }
 
-            if hint_y.len()-1 >= 1 || hint_x.len()-1 >= 1 {
+            //上
+            if pop_y == 0 && pop_x != 0 && pop_x != hint_x.len()-1 {
 
-                if input_y == 0 && input_x == 0 {
-                    //左上
-                    if hint_num[input_y][input_x + 1] == 0 {
-                        if map[map_y][map_x + 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x + 1] = num_convert(hint_num[input_y][input_x + 1]);
-                            open_cell(&hint_num, map, input_x + 1, input_y)
-                        }
+                if hint_num[pop_y][pop_x-1] == 0 {
+                    if map[map_y][map_x-1] == " 🟦 ".to_string(){
+                        map[map_y][map_x-1] = num_convert(hint_num[pop_y][pop_x-1]);
+                        queue.push(vec![pop_x-1, pop_y])
                     }
-                    if input_x+1 <= 8 && input_x+1 != 0 {
-                        if map[map_y][map_x + 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x + 1] = num_convert(hint_num[input_y][input_x + 1]);
-                        }
-                    }
-
-                    if hint_num[input_y + 1][input_x] == 0 {
-                        if map[map_y + 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y + 1][map_x] = num_convert(hint_num[input_y + 1][input_x]);
-                            open_cell(&hint_num, map, input_x, input_y + 1)
-                        }
-                    }
-                    if input_y+1 <= 8 && input_y+1 != 0 {
-                        if map[map_y + 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y + 1][map_x] = num_convert(hint_num[input_y + 1][input_x]);
-                        }
-                    }
-
                 }
-
-                //上
-                if input_y == 0 && input_x != 0 && input_x != hint_x.len()-1 {
-
-                    if hint_num[input_y][input_x-1] == 0 {
-                        if map[map_y][map_x-1] == " 🟦 ".to_string(){
-                            map[map_y][map_x-1] = num_convert(hint_num[input_y][input_x-1]);
-                            open_cell(&hint_num, map,input_x-1,input_y)
-                        }
-                    }
-                    if input_x-1 <= 8 && input_x-1 != 0 {
-                        if map[map_y][map_x - 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x - 1] = num_convert(hint_num[input_y][input_x - 1]);
-                        }
-                    }
-
-                    if hint_num[input_y][input_x + 1] == 0 {
-                        if map[map_y][map_x + 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x + 1] = num_convert(hint_num[input_y][input_x + 1]);
-                            open_cell(&hint_num, map, input_x + 1, input_y)
-                        }
-                    }
-                    if input_x+1 <= 8 && input_x+1 != 0 {
-                        if map[map_y][map_x + 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x + 1] = num_convert(hint_num[input_y][input_x + 1]);
-                        }
-                    }
-
-                    if hint_num[input_y + 1][input_x] == 0 {
-                        if map[map_y + 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y + 1][map_x] = num_convert(hint_num[input_y + 1][input_x]);
-                            open_cell(&hint_num, map, input_x, input_y + 1)
-                        }
-                    }
-                    if input_y+1 <= 8 && input_y+1 != 0 {
-                        if map[map_y + 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y + 1][map_x] = num_convert(hint_num[input_y + 1][input_x]);
-                        }
-                    }
-
-                }
-
-                //右上
-                if input_y == 0 && input_x == hint_x.len()-1 {
-
-                    if hint_num[input_y][input_x-1] == 0 {
-                        if map[map_y][map_x-1] == " 🟦 ".to_string(){
-                            map[map_y][map_x-1] = num_convert(hint_num[input_y][input_x-1]);
-                            open_cell(&hint_num, map,input_x-1,input_y)
-                        }
-                    }
-                    if input_x-1 <= 8 && input_x-1 != 0 {
-                        if map[map_y][map_x - 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x - 1] = num_convert(hint_num[input_y][input_x - 1]);
-                        }
-                    }
-
-                    if hint_num[input_y + 1][input_x] == 0 {
-                        if map[map_y + 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y + 1][map_x] = num_convert(hint_num[input_y + 1][input_x]);
-                            open_cell(&hint_num, map, input_x, input_y + 1)
-                        }
-                    }
-                    if input_y+1 <= 8 && input_y+1 != 0 {
-                        if map[map_y + 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y + 1][map_x] = num_convert(hint_num[input_y + 1][input_x]);
-                        }
+                if pop_x-1 <= 8 && pop_x-1 != 0 {
+                    if map[map_y][map_x - 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x - 1] = num_convert(hint_num[pop_y][pop_x - 1]);
                     }
                 }
 
-                //左
-                if input_x == 0 && input_y != 0 && input_y != hint_y.len()-1 {
-
-                    if hint_num[input_y - 1][input_x] == 0 {
-                        if map[map_y - 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y - 1][map_x] = num_convert(hint_num[input_y - 1][input_x]);
-                            open_cell(&hint_num, map, input_x, input_y - 1)
-                        }
+                if hint_num[pop_y][pop_x + 1] == 0 {
+                    if map[map_y][map_x + 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x + 1] = num_convert(hint_num[pop_y][pop_x + 1]);
+                        queue.push(vec![pop_x+1, pop_y])
                     }
-                    if input_y-1 <= 8 && input_y-1 != 0 {
-                        if map[map_y - 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y - 1][map_x] = num_convert(hint_num[input_y - 1][input_x]);
-                        }
-                    }
-
-                    if hint_num[input_y][input_x + 1] == 0 {
-                        if map[map_y][map_x + 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x + 1] = num_convert(hint_num[input_y][input_x + 1]);
-                            open_cell(&hint_num, map, input_x + 1, input_y)
-                        }
-                    }
-                    if input_x+1 <= 8 && input_x+1 != 0 {
-                        if map[map_y][map_x + 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x + 1] = num_convert(hint_num[input_y][input_x + 1]);
-                        }
-                    }
-
-                    if hint_num[input_y + 1][input_x] == 0 {
-                        if map[map_y + 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y + 1][map_x] = num_convert(hint_num[input_y + 1][input_x]);
-                            open_cell(&hint_num, map, input_x, input_y + 1)
-                        }
-                    }
-                    if input_y+1 <= 8 && input_y+1 != 0 {
-                        if map[map_y + 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y + 1][map_x] = num_convert(hint_num[input_y + 1][input_x]);
-                        }
+                }
+                if pop_x+1 <= 8 && pop_x+1 != 0 {
+                    if map[map_y][map_x + 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x + 1] = num_convert(hint_num[pop_y][pop_x + 1]);
                     }
                 }
 
-                //右
-                if input_x == hint_x.len()-1 && input_y != 0 && input_y != hint_y.len()-1 {
-
-                    if hint_num[input_y - 1][input_x] == 0 {
-                        if map[map_y - 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y - 1][map_x] = num_convert(hint_num[input_y - 1][input_x]);
-                            open_cell(&hint_num, map, input_x, input_y - 1)
-                        }
+                if hint_num[pop_y + 1][pop_x] == 0 {
+                    if map[map_y + 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y + 1][map_x] = num_convert(hint_num[pop_y + 1][pop_x]);
+                        queue.push(vec![pop_x, pop_y+1])
                     }
-                    if input_y-1 <= 8 && input_y-1 != 0 {
-                        if map[map_y - 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y - 1][map_x] = num_convert(hint_num[input_y - 1][input_x]);
-                        }
-                    }
-
-                    if hint_num[input_y][input_x-1] == 0 {
-                        if map[map_y][map_x-1] == " 🟦 ".to_string(){
-                            map[map_y][map_x-1] = num_convert(hint_num[input_y][input_x-1]);
-                            open_cell(&hint_num,map,input_x-1,input_y)
-                        }
-                    }
-                    if input_x-1 <= 8 && input_x-1 != 0 {
-                        if map[map_y][map_x - 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x - 1] = num_convert(hint_num[input_y][input_x - 1]);
-                        }
-                    }
-
-                    if hint_num[input_y + 1][input_x] == 0 {
-                        if map[map_y + 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y + 1][map_x] = num_convert(hint_num[input_y + 1][input_x]);
-                            open_cell(&hint_num, map, input_x, input_y + 1)
-                        }
-                    }
-                    if input_y+1 <= 8 && input_y+1 != 0 {
-                        if map[map_y + 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y + 1][map_x] = num_convert(hint_num[input_y + 1][input_x]);
-                        }
+                }
+                if hint_num[pop_y + 1][pop_x] <= 8 && hint_num[pop_y + 1][pop_x] != 0 {
+                    if map[map_y + 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y + 1][map_x] = num_convert(hint_num[pop_y + 1][pop_x]);
                     }
                 }
 
-                //左下
-                if input_y == hint_y.len()-1 && input_x == 0 {
+            }
 
-                    if hint_num[input_y - 1][input_x] == 0 {
-                        if map[map_y - 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y - 1][map_x] = num_convert(hint_num[input_y - 1][input_x]);
-                            open_cell(&hint_num, map, input_x, input_y - 1)
-                        }
-                    }
-                    if input_y-1 <= 8 && input_y-1 != 0 {
-                        if map[map_y - 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y - 1][map_x] = num_convert(hint_num[input_y - 1][input_x]);
-                        }
-                    }
+            //右上
+            if pop_y == 0 && pop_x == hint_x.len()-1 {
 
-                    if hint_num[input_y][input_x + 1] == 0 {
-                        if map[map_y][map_x + 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x + 1] = num_convert(hint_num[input_y][input_x + 1]);
-                            open_cell(&hint_num, map, input_x + 1, input_y)
-                        }
+                if hint_num[pop_y][pop_x-1] == 0 {
+                    if map[map_y][map_x-1] == " 🟦 ".to_string(){
+                        map[map_y][map_x-1] = num_convert(hint_num[pop_y][pop_x-1]);
+                        queue.push(vec![pop_x-1, pop_y])
                     }
-                    if input_x+1 <= 8 && input_x+1 != 0 {
-                        if map[map_y][map_x + 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x + 1] = num_convert(hint_num[input_y][input_x + 1]);
-                        }
+                }
+                if hint_num[pop_y][pop_x-1] <= 8 && hint_num[pop_y][pop_x-1] != 0 {
+                    if map[map_y][map_x - 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x - 1] = num_convert(hint_num[pop_y][pop_x - 1]);
                     }
                 }
 
-                //下
-                if input_y == hint_y.len()-1 && input_x != 0 && input_x != hint_x.len()-1 {
-
-                    if hint_num[input_y - 1][input_x] == 0 {
-                        if map[map_y - 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y - 1][map_x] = num_convert(hint_num[input_y - 1][input_x]);
-                            open_cell(&hint_num, map, input_x, input_y - 1)
-                        }
-                    }
-                    if input_y-1 <= 8 && input_y-1 != 0 {
-                        if map[map_y - 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y - 1][map_x] = num_convert(hint_num[input_y - 1][input_x]);
-                        }
-                    }
-
-                    if hint_num[input_y][input_x-1] == 0 {
-                        if map[map_y][map_x-1] == " 🟦 ".to_string(){
-                            map[map_y][map_x-1] = num_convert(hint_num[input_y][input_x-1]);
-                            open_cell(&hint_num,map,input_x-1,input_y)
-                        }
-                    }
-                    if input_x-1 <= 8 && input_x-1 != 0 {
-                        if map[map_y][map_x - 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x - 1] = num_convert(hint_num[input_y][input_x - 1]);
-                        }
-                    }
-
-                    if hint_num[input_y][input_x + 1] == 0 {
-                        if map[map_y][map_x + 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x + 1] = num_convert(hint_num[input_y][input_x + 1]);
-                            open_cell(&hint_num, map, input_x + 1, input_y)
-                        }
-                    }
-                    if input_x+1 <= 8 && input_x+1 != 0 {
-                        if map[map_y][map_x + 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x + 1] = num_convert(hint_num[input_y][input_x + 1]);
-                        }
+                if hint_num[pop_y + 1][pop_x] == 0 {
+                    if map[map_y + 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y + 1][map_x] = num_convert(hint_num[pop_y + 1][pop_x]);
+                        queue.push(vec![pop_x, pop_y+1])
                     }
                 }
-
-                //右下
-                if input_y == hint_y.len()-1 && input_x == hint_x.len()-1 {
-
-                    if hint_num[input_y - 1][input_x] == 0 {
-                        if map[map_y - 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y - 1][map_x] = num_convert(hint_num[input_y - 1][input_x]);
-                            open_cell(&hint_num, map, input_x, input_y - 1)
-                        }
-                    }
-                    if input_y-1 <= 8 && input_y-1 != 0 {
-                        if map[map_y - 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y - 1][map_x] = num_convert(hint_num[input_y - 1][input_x]);
-                        }
-                    }
-
-                    if hint_num[input_y][input_x-1] == 0 {
-                        if map[map_y][map_x-1] == " 🟦 ".to_string(){
-                            map[map_y][map_x-1] = num_convert(hint_num[input_y][input_x-1]);
-                            open_cell(&hint_num,map,input_x-1,input_y)
-                        }
-                    }
-                    if input_x-1 <= 8 && input_x-1 != 0 {
-                        if map[map_y][map_x - 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x - 1] = num_convert(hint_num[input_y][input_x - 1]);
-                        }
-                    }
-                }
-
-                //中
-                if input_y != 0 && input_y != hint_y.len()-1 && input_x != 0 && input_x != hint_x.len()-1 {
-
-                    if hint_num[input_y - 1][input_x] == 0 {
-                        if map[map_y - 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y - 1][map_x] = num_convert(hint_num[input_y - 1][input_x]);
-                            open_cell(&hint_num, map, input_x, input_y - 1)
-                        }
-                    }
-
-                    if input_y-1 <= 8 && input_y-1 != 0 {
-                        if map[map_y - 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y - 1][map_x] = num_convert(hint_num[input_y - 1][input_x]);
-                        }
-                    }
-
-                    if hint_num[input_y][input_x-1] == 0 {
-                        if map[map_y][map_x-1] == " 🟦 ".to_string(){
-                            map[map_y][map_x-1] = num_convert(hint_num[input_y][input_x-1]);
-                            open_cell(&hint_num,map,input_x-1,input_y)
-                        }
-                    }
-
-                    if input_x-1 <= 8 && input_x-1 != 0 {
-                        if map[map_y][map_x - 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x - 1] = num_convert(hint_num[input_y][input_x - 1]);
-                        }
-                    }
-
-                    if hint_num[input_y][input_x + 1] == 0 {
-                        if map[map_y][map_x + 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x + 1] = num_convert(hint_num[input_y][input_x + 1]);
-                            open_cell(&hint_num, map, input_x + 1, input_y)
-                        }
-                    }
-
-                    if input_x+1 <= 8 && input_x+1 != 0 {
-                        if map[map_y][map_x + 1] == " 🟦 ".to_string() {
-                            map[map_y][map_x + 1] = num_convert(hint_num[input_y][input_x + 1]);
-                        }
-                    }
-
-                    if hint_num[input_y + 1][input_x] == 0 {
-                        if map[map_y + 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y + 1][map_x] = num_convert(hint_num[input_y + 1][input_x]);
-                            open_cell(&hint_num, map, input_x, input_y + 1)
-                        }
-                    }
-
-                    if input_y+1 <= 8 && input_y+1 != 0 {
-                        if map[map_y + 1][map_x] == " 🟦 ".to_string() {
-                            map[map_y + 1][map_x] = num_convert(hint_num[input_y + 1][input_x]);
-                        }
+                if hint_num[pop_y + 1][pop_x] <= 8 && hint_num[pop_y + 1][pop_x] != 0 {
+                    if map[map_y + 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y + 1][map_x] = num_convert(hint_num[pop_y + 1][pop_x]);
                     }
                 }
             }
+
+            //左
+            if pop_x == 0 && pop_y != 0 && pop_y != hint_y.len()-1 {
+
+                if hint_num[pop_y - 1][pop_x] == 0 {
+                    if map[map_y - 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y - 1][map_x] = num_convert(hint_num[pop_y - 1][pop_x]);
+                        queue.push(vec![pop_x, pop_y-1])
+                    }
+                }
+                if hint_num[pop_y - 1][pop_x] <= 8 && hint_num[pop_y - 1][pop_x] != 0 {
+                    if map[map_y - 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y - 1][map_x] = num_convert(hint_num[pop_y - 1][pop_x]);
+                    }
+                }
+
+                if hint_num[pop_y][pop_x + 1] == 0 {
+                    if map[map_y][map_x + 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x + 1] = num_convert(hint_num[pop_y][pop_x + 1]);
+                        queue.push(vec![pop_x+1, pop_y])
+                    }
+                }
+                if hint_num[pop_y][pop_x + 1] <= 8 && hint_num[pop_y][pop_x + 1] != 0 {
+                    if map[map_y][map_x + 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x + 1] = num_convert(hint_num[pop_y][pop_x + 1]);
+                    }
+                }
+
+                if hint_num[pop_y + 1][pop_x] == 0 {
+                    if map[map_y + 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y + 1][map_x] = num_convert(hint_num[pop_y + 1][pop_x]);
+                        queue.push(vec![pop_x, pop_y+1])
+                    }
+                }
+                if hint_num[pop_y + 1][pop_x] <= 8 && hint_num[pop_y + 1][pop_x] != 0 {
+                    if map[map_y + 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y + 1][map_x] = num_convert(hint_num[pop_y + 1][pop_x]);
+                    }
+                }
+            }
+
+            //右
+            if pop_x == hint_x.len()-1 && pop_y != 0 && pop_y != hint_y.len()-1 {
+
+                if hint_num[pop_y - 1][pop_x] == 0 {
+                    if map[map_y - 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y - 1][map_x] = num_convert(hint_num[pop_y - 1][pop_x]);
+                        queue.push(vec![pop_x, pop_y-1])
+                    }
+                }
+                if hint_num[pop_y - 1][pop_x] <= 8 && hint_num[pop_y - 1][pop_x] != 0 {
+                    if map[map_y - 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y - 1][map_x] = num_convert(hint_num[pop_y - 1][pop_x]);
+                    }
+                }
+
+                if hint_num[pop_y][pop_x-1] == 0 {
+                    if map[map_y][map_x-1] == " 🟦 ".to_string(){
+                        map[map_y][map_x-1] = num_convert(hint_num[pop_y][pop_x-1]);
+                        queue.push(vec![pop_x-1, pop_y])
+                    }
+                }
+                if hint_num[pop_y][pop_x-1] <= 8 && hint_num[pop_y][pop_x-1] != 0 {
+                    if map[map_y][map_x - 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x - 1] = num_convert(hint_num[pop_y][pop_x - 1]);
+                    }
+                }
+
+                if hint_num[pop_y + 1][pop_x] == 0 {
+                    if map[map_y + 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y + 1][map_x] = num_convert(hint_num[pop_y + 1][pop_x]);
+                        queue.push(vec![pop_x, pop_y+1])
+                    }
+                }
+                if hint_num[pop_y + 1][pop_x] <= 8 && hint_num[pop_y + 1][pop_x] != 0 {
+                    if map[map_y + 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y + 1][map_x] = num_convert(hint_num[pop_y + 1][pop_x]);
+                    }
+                }
+            }
+
+            //左下
+            if pop_y == hint_y.len()-1 && pop_x == 0 {
+
+                if hint_num[pop_y - 1][pop_x] == 0 {
+                    if map[map_y - 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y - 1][map_x] = num_convert(hint_num[pop_y - 1][pop_x]);
+                        queue.push(vec![pop_x, pop_y-1])
+                    }
+                }
+                if hint_num[pop_y - 1][pop_x] <= 8 && hint_num[pop_y - 1][pop_x] != 0 {
+                    if map[map_y - 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y - 1][map_x] = num_convert(hint_num[pop_y - 1][pop_x]);
+                    }
+                }
+
+                if hint_num[pop_y][pop_x + 1] == 0 {
+                    if map[map_y][map_x + 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x + 1] = num_convert(hint_num[pop_y][pop_x + 1]);
+                        queue.push(vec![pop_x+1, pop_y])
+                    }
+                }
+                if hint_num[pop_y][pop_x + 1] <= 8 && hint_num[pop_y][pop_x + 1] != 0 {
+                    if map[map_y][map_x + 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x + 1] = num_convert(hint_num[pop_y][pop_x + 1]);
+                    }
+                }
+            }
+
+            //下
+            if pop_y == hint_y.len()-1 && pop_x != 0 && pop_x != hint_x.len()-1 {
+
+                if hint_num[pop_y - 1][pop_x] == 0 {
+                    if map[map_y - 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y - 1][map_x] = num_convert(hint_num[pop_y - 1][pop_x]);
+                        queue.push(vec![pop_x, pop_y-1])
+                    }
+                }
+                if hint_num[pop_y - 1][pop_x] <= 8 && hint_num[pop_y - 1][pop_x] != 0 {
+                    if map[map_y - 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y - 1][map_x] = num_convert(hint_num[pop_y - 1][pop_x]);
+                    }
+                }
+
+                if hint_num[pop_y][pop_x-1] == 0 {
+                    if map[map_y][map_x-1] == " 🟦 ".to_string(){
+                        map[map_y][map_x-1] = num_convert(hint_num[pop_y][pop_x-1]);
+                        queue.push(vec![pop_x-1, pop_y])
+                    }
+                }
+                if hint_num[pop_y][pop_x-1] <= 8 && hint_num[pop_y][pop_x-1] != 0 {
+                    if map[map_y][map_x - 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x - 1] = num_convert(hint_num[pop_y][pop_x - 1]);
+                    }
+                }
+
+                if hint_num[pop_y][pop_x + 1] == 0 {
+                    if map[map_y][map_x + 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x + 1] = num_convert(hint_num[pop_y][pop_x + 1]);
+                        queue.push(vec![pop_x+1, pop_y])
+                    }
+                }
+                if hint_num[pop_y][pop_x + 1] <= 8 && hint_num[pop_y][pop_x + 1] != 0 {
+                    if map[map_y][map_x + 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x + 1] = num_convert(hint_num[pop_y][pop_x + 1]);
+                    }
+                }
+            }
+
+            //右下
+            if pop_y == hint_y.len()-1 && pop_x == hint_x.len()-1 {
+
+                if hint_num[pop_y - 1][pop_x] == 0 {
+                    if map[map_y - 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y - 1][map_x] = num_convert(hint_num[pop_y - 1][pop_x]);
+                        queue.push(vec![pop_x, pop_y-1])
+                    }
+                }
+                if hint_num[pop_y - 1][pop_x] <= 8 && hint_num[pop_y - 1][pop_x] != 0 {
+                    if map[map_y - 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y - 1][map_x] = num_convert(hint_num[pop_y - 1][pop_x]);
+                    }
+                }
+
+                if hint_num[pop_y][pop_x-1] == 0 {
+                    if map[map_y][map_x-1] == " 🟦 ".to_string(){
+                        map[map_y][map_x-1] = num_convert(hint_num[pop_y][pop_x-1]);
+                        queue.push(vec![pop_x-1, pop_y])
+                    }
+                }
+                if hint_num[pop_y][pop_x-1] <= 8 && hint_num[pop_y][pop_x-1] != 0 {
+                    if map[map_y][map_x - 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x - 1] = num_convert(hint_num[pop_y][pop_x - 1]);
+                    }
+                }
+            }
+
+            //中
+            if pop_y != 0 && pop_y != hint_y.len()-1 && pop_x != 0 && pop_x != hint_x.len()-1 {
+
+                if hint_num[pop_y - 1][pop_x] == 0 {
+                    if map[map_y - 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y - 1][map_x] = num_convert(hint_num[pop_y - 1][pop_x]);
+                        queue.push(vec![pop_x, pop_y-1])
+                    }
+                }
+
+                if hint_num[pop_y - 1][pop_x] <= 8 && hint_num[pop_y - 1][pop_x] != 0 {
+                    if map[map_y - 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y - 1][map_x] = num_convert(hint_num[pop_y - 1][pop_x]);
+                    }
+                }
+
+                if hint_num[pop_y][pop_x-1] == 0 {
+                    if map[map_y][map_x-1] == " 🟦 ".to_string(){
+                        map[map_y][map_x-1] = num_convert(hint_num[pop_y][pop_x-1]);
+                        queue.push(vec![pop_x-1, pop_y])
+                    }
+                }
+
+                if hint_num[pop_y][pop_x-1] <= 8 && hint_num[pop_y][pop_x-1] != 0 {
+                    if map[map_y][map_x - 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x - 1] = num_convert(hint_num[pop_y][pop_x - 1]);
+                    }
+                }
+
+                if hint_num[pop_y][pop_x + 1] == 0 {
+                    if map[map_y][map_x + 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x + 1] = num_convert(hint_num[pop_y][pop_x + 1]);
+                        queue.push(vec![pop_x+1, pop_y])
+                    }
+                }
+
+                if hint_num[pop_y][pop_x + 1] <= 8 && hint_num[pop_y][pop_x + 1] != 0 {
+                    if map[map_y][map_x + 1] == " 🟦 ".to_string() {
+                        map[map_y][map_x + 1] = num_convert(hint_num[pop_y][pop_x + 1]);
+                    }
+                }
+
+                if hint_num[pop_y + 1][pop_x] == 0 {
+                    if map[map_y + 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y + 1][map_x] = num_convert(hint_num[pop_y + 1][pop_x]);
+                        queue.push(vec![pop_x, pop_y+1])
+                    }
+                }
+
+                if hint_num[pop_y + 1][pop_x] <= 8 && hint_num[pop_y + 1][pop_x] != 0 {
+                    if map[map_y + 1][map_x] == " 🟦 ".to_string() {
+                        map[map_y + 1][map_x] = num_convert(hint_num[pop_y + 1][pop_x]);
+                    }
+                }
+            }
+        }
+
+    }
 }
